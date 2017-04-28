@@ -1,8 +1,19 @@
+From 5cac8936bd4573ecaab1b8523369d2b8ae74088c Mon Sep 17 00:00:00 2001
+From: Andrey Konovalov <andrey.konovalov@linaro.org>
+Date: Fri, 28 Apr 2017 21:37:37 +0300
+Subject: [PATCH] OCDM patch for chromium-53.0.2785.143
+
+---
+ chrome/chrome_renderer.gypi                       | 1 +
+ chrome/renderer/chrome_content_renderer_client.cc | 3 +++
+ media/media.gyp                                   | 1 +
+ 3 files changed, 5 insertions(+)
+
 diff --git a/chrome/chrome_renderer.gypi b/chrome/chrome_renderer.gypi
-index 9bcc3db..c3900b7 100644
+index cae6dcb..3642ff3 100644
 --- a/chrome/chrome_renderer.gypi
 +++ b/chrome/chrome_renderer.gypi
-@@ -275,6 +275,7 @@
+@@ -274,6 +274,7 @@
          '../third_party/icu/icu.gyp:icui18n',
          '../third_party/icu/icu.gyp:icuuc',
          '../third_party/widevine/cdm/widevine_cdm.gyp:widevine_cdm_version_h',
@@ -11,76 +22,38 @@ index 9bcc3db..c3900b7 100644
        'include_dirs': [
          '..',
 diff --git a/chrome/renderer/chrome_content_renderer_client.cc b/chrome/renderer/chrome_content_renderer_client.cc
-index cc4ba2b..ca602f9 100644
+index b0d17fe..060f523 100644
 --- a/chrome/renderer/chrome_content_renderer_client.cc
 +++ b/chrome/renderer/chrome_content_renderer_client.cc
-@@ -128,6 +128,8 @@
- #include "extensions/renderer/script_context.h"
+@@ -130,6 +130,8 @@
+ #include "extensions/renderer/renderer_extension_registry.h"
  #endif
  
 +#include "media/cdm/ppapi/external_open_cdm/src/browser/opencdm_key_systems.h"
 +
- #if defined(ENABLE_IPC_FUZZER)
- #include "chrome/common/external_ipc_dumper.h"
- #endif
-@@ -1495,6 +1497,7 @@ bool ChromeContentRendererClient::AllowPepperMediaStreamAPI(
- void ChromeContentRendererClient::AddKeySystems(
-     std::vector<media::KeySystemInfo>* key_systems) {
+ #if defined(ENABLE_PLUGINS)
+ #include "chrome/renderer/plugins/chrome_plugin_placeholder.h"
+ #include "chrome/renderer/plugins/power_saver_info.h"
+@@ -1208,6 +1210,7 @@ bool ChromeContentRendererClient::AllowPepperMediaStreamAPI(
+ void ChromeContentRendererClient::AddSupportedKeySystems(
+     std::vector<std::unique_ptr<::media::KeySystemProperties>>* key_systems) {
    AddChromeKeySystems(key_systems);
 +  AddExternalOpenCdmKeySystems(key_systems);
  }
  
  bool ChromeContentRendererClient::ShouldReportDetailedMessageForSource(
-diff --git a/media/base/key_systems.cc b/media/base/key_systems.cc
-index 32fa1c7..55002bd 100644
---- a/media/base/key_systems.cc
-+++ b/media/base/key_systems.cc
-@@ -152,6 +152,10 @@ static bool IsPotentiallySupportedKeySystem(const std::string& key_system) {
-   if (IsExternalClearKey(key_system))
-     return true;
- 
-+  // Linaro: External playready
-+  if (key_system == kPlayreadyKey)
-+    return true;
-+
-   // Chromecast defines behaviors for Cast clients within its reverse domain.
-   const char kChromecastRoot[] = "com.chromecast";
-   if (IsParentKeySystemOf(kChromecastRoot, key_system))
-diff --git a/media/cdm/key_system_names.cc b/media/cdm/key_system_names.cc
-index 1782203..3ffe7e6 100644
---- a/media/cdm/key_system_names.cc
-+++ b/media/cdm/key_system_names.cc
-@@ -8,6 +8,7 @@
- namespace media {
- 
- const char kClearKey[] = "org.w3.clearkey";
-+const char kPlayreadyKey[] = "com.microsoft.playready";
- const char kExternalClearKey[] = "org.chromium.externalclearkey";
- 
- bool IsClearKey(const std::string& key_system) {
-diff --git a/media/cdm/key_system_names.h b/media/cdm/key_system_names.h
-index 6c388b98..186c85f 100644
---- a/media/cdm/key_system_names.h
-+++ b/media/cdm/key_system_names.h
-@@ -16,6 +16,9 @@ namespace media {
- // The key system name for Clear Key.
- MEDIA_EXPORT extern const char kClearKey[];
- 
-+// The key system name for Playready
-+MEDIA_EXPORT extern const char kPlayreadyKey[];
-+
- // The key system name for External Clear Key.
- MEDIA_EXPORT extern const char kExternalClearKey[];
- 
 diff --git a/media/media.gyp b/media/media.gyp
-index f041c15..b4ca153 100644
+index d2baca7..acea9c0 100644
 --- a/media/media.gyp
 +++ b/media/media.gyp
-@@ -45,6 +45,7 @@
-   },
+@@ -51,6 +51,7 @@
    'includes': [
      'media_cdm.gypi',
+     'media_variables.gypi',
 +    './cdm/ppapi/external_open_cdm/src/browser/media_open_cdm.gypi',
    ],
    'targets': [
      {
+-- 
+2.7.4
+
