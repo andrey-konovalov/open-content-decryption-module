@@ -142,6 +142,9 @@
         {
         'target_name': 'opencdmkeysystems',
         'type': 'static_library',
+        'dependencies': [
+          'media',
+        ],
         'conditions': [
           ['playready == 1', { 
             'defines' : [ 'OCDM_USE_PLAYREADY' ],
