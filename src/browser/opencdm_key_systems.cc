@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
+#include "base/logging.h"
 #include "base/strings/string16.h"
+#include "media/base/eme_constants.h"
+#include "media/base/key_system_properties.h"
 #include "opencdm_key_systems.h"
 using namespace media;
 
@@ -70,7 +73,7 @@ class ExternalOpenCdmKeyProperties : public KeySystemProperties {
       media::EmeInitDataType init_data_type) const override {
     switch (init_data_type) {
       case media::EmeInitDataType::WEBM:
-      ///case media::EmeInitDataType::KEYIDS:
+      case media::EmeInitDataType::KEYIDS:
         return true;
 
       case media::EmeInitDataType::CENC:
@@ -85,6 +88,14 @@ class ExternalOpenCdmKeyProperties : public KeySystemProperties {
     }
     NOTREACHED();
     return false;
+  }
+
+  SupportedCodecs GetSupportedCodecs() const override {
+#if defined(USE_PROPRIETARY_CODECS)
+    return media::EME_CODEC_MP4_ALL | media::EME_CODEC_WEBM_ALL;
+#else
+    return media::EME_CODEC_WEBM_ALL;
+#endif
   }
 
   media::EmeConfigRule GetRobustnessConfigRule(
@@ -122,7 +133,7 @@ class ExternalOpenCdmKeyProperties : public KeySystemProperties {
 };
 #endif
 
-void AddExternalOpenCdmKeySystems(std::vector<std::unique_ptr<::media::KeySystemProperties>>* key_systems) {
+void AddExternalOpenCdmKeySystems(std::vector<std::unique_ptr<KeySystemProperties>>* key_systems) {
 #ifdef OCDM_USE_PLAYREADY
   //TODO: AddPlayreadyKeySystem(key_systems);
 #else

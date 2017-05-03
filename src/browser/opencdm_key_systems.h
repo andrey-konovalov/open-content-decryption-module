@@ -17,8 +17,11 @@
 #define MEDIA_CDM_PPAPI_EXTERNALOCDM_OCDM_KEYSYSTEMS_H_
 #include <memory>
 #include <vector>
-#include "media/base/key_systems.h"
 
-void AddExternalOpenCdmKeySystems(std::vector<std::unique_ptr<::media::KeySystemProperties>>* key_systems);
+namespace media {
+class KeySystemProperties;
+}
+
+void AddExternalOpenCdmKeySystems(std::vector<std::unique_ptr<media::KeySystemProperties>>* key_systems);
 
 #endif
