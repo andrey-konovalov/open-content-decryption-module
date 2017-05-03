@@ -15,6 +15,7 @@
 */
 #ifndef MEDIA_CDM_PPAPI_EXTERNALOCDM_OCDM_KEYSYSTEMS_H_
 #define MEDIA_CDM_PPAPI_EXTERNALOCDM_OCDM_KEYSYSTEMS_H_
+#include <memory>
 #include <vector>
 #include "media/base/key_systems.h"
 
