@@ -131,7 +131,7 @@ static scoped_refptr<media::DecoderBuffer> CopyDecoderBufferFrom(
                       input_buffer.iv_size),
           subsamples));
 
-  output_buffer->set_decrypt_config(decrypt_config.Pass());
+  output_buffer->set_decrypt_config(std::move(decrypt_config));
   output_buffer->set_timestamp(
       base::TimeDelta::FromMicroseconds(input_buffer.timestamp));
 
@@ -346,7 +346,7 @@ void OpenCdm::OnKeyStatusUpdateCallback(OpenCdmPlatformSessionId platform_sessio
     key_info->system_code = 0;
     keys_info.push_back(key_info.release());
   }
-  OnSessionKeysUpdate(GetChromeSessionId(platform_session_id), true, keys_info.Pass());
+  OnSessionKeysUpdate(GetChromeSessionId(platform_session_id), true, std::move(keys_info));
   CDM_DLOG() << "Got key status update : %s:" << message;
 }
 
