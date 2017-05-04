@@ -196,7 +196,7 @@ static cdm::Error ConvertException(media::MediaKeys::Exception exception_code) {
     keys_vector->reserve(keys_info.size());
     for (const auto& key_info : keys_info) {
       cdm::KeyInformation key;
-      key.key_id = vector_as_array(&key_info->key_id);
+      key.key_id = key_info->key_id.data();
       key.key_id_size = key_info->key_id.size();
       key.status = ConvertKeyStatus(key_info->status);
       key.system_code = key_info->system_code;
@@ -274,7 +274,7 @@ void OpenCdm::ReadyCallback(OpenCdmPlatformSessionId platform_session_id) {
   std::string web_session_id = GetChromeSessionId(platform_session_id);
   std::vector<cdm::KeyInformation> keys_vector;
   host_->OnSessionKeysChange(web_session_id.data(), web_session_id.length(),
-      true, vector_as_array(&keys_vector), keys_vector.size());
+      true, keys_vector.data(), keys_vector.size());
 }
 
 void OpenCdm::LoadSession(uint32_t promise_id,
@@ -359,7 +359,7 @@ void OpenCdm::OnSessionKeysUpdate(const std::string& session_id,
     ConvertCdmKeysInfo(keys_info.get(), &keys_vector);
     host_->OnSessionKeysChange(new_session_id.data(), new_session_id.length(),
                                has_additional_usable_key,
-                               vector_as_array(&keys_vector), keys_vector.size());
+                               keys_vector.data(), keys_vector.size());
     CDM_DLOG() << "Session keys updated" ;
   }
 
