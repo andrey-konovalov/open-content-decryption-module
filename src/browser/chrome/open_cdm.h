@@ -182,7 +182,7 @@ class OpenCdm : public OpenCdmInterface,
       OpenCdmPlatformSessionId platform_session_id);
 
   // Timer delay in milliseconds for the next host_->SetTimer() call.
-  int64 timer_delay_ms_;
+  int64_t timer_delay_ms_;
 
   // Indicates whether a renewal timer has been set to prevent multiple timers
   // from running.

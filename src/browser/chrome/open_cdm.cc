@@ -88,10 +88,10 @@ static bool g_ffmpeg_lib_initialized UNUSED = InitializeFFmpegLibraries();
 // FIXME(jrummell): Remove this once prefixed EME goes away.
 const char kRenewalHeader[] = "RENEWAL";
 
-static const int64 kSecondsPerMinute = 60;
-static const int64 kMsPerSecond = 1000;
-static const int64 kInitialTimerDelayMs = 200;
-static const int64 kMaxTimerDelayMs = 1 * kSecondsPerMinute * kMsPerSecond;
+static const int64_t kSecondsPerMinute = 60;
+static const int64_t kMsPerSecond = 1000;
+static const int64_t kInitialTimerDelayMs = 200;
+static const int64_t kMaxTimerDelayMs = 1 * kSecondsPerMinute * kMsPerSecond;
 
 /* Currently we don't return the status from he CDMI if the keys are added.
  * Whenever there are no keys added we need
