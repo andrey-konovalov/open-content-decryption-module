@@ -27,7 +27,7 @@
 
 #include <string>
 #include <vector>
-#include "base/basictypes.h"  // needed for media::MediaKeys::Exception
+#include <stdint.h>
 #include "base/containers/scoped_ptr_hash_map.h"
 #include "base/memory/ref_counted.h"
 #include "base/memory/scoped_ptr.h"
