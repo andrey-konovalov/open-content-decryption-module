@@ -59,32 +59,32 @@ class OpenCdm : public OpenCdmInterface,
   // OpenDecryptor MediaKeys implementation
   void Initialize(bool allow_distinctive_identifier,
                   bool allow_persistent_state) override;
-  void CreateSessionAndGenerateRequest(uint32 promise_id,
+  void CreateSessionAndGenerateRequest(uint32_t promise_id,
                                                cdm::SessionType session_type,
                                                cdm::InitDataType init_data_type,
                                                const uint8* init_data,
-                                               uint32 init_data_size) override;
+                                               uint32_t init_data_size) override;
 
-  void LoadSession(uint32 promise_id,
+  void LoadSession(uint32_t promise_id,
                            cdm::SessionType session_type,
                            const char* web_session_id,
                            uint32_t web_session_id_length) override;
 
-  void CloseSession(uint32 promise_id,
+  void CloseSession(uint32_t promise_id,
                             const char* web_session_id,
                             uint32_t web_session_id_length) override;
 
-  void UpdateSession(uint32 promise_id,
+  void UpdateSession(uint32_t promise_id,
                              const char* web_session_id,
                              uint32_t web_session_id_length,
                              const uint8* response,
-                             uint32 response_size) override;
+                             uint32_t response_size) override;
 
-  void RemoveSession(uint32 promise_id,
+  void RemoveSession(uint32_t promise_id,
                              const char* web_session_id,
                              uint32_t web_session_id_length) override;
 
-  void SetServerCertificate(uint32 promise_id,
+  void SetServerCertificate(uint32_t promise_id,
                                     const uint8_t* server_certificate_data,
                                     uint32_t server_certificate_data_size)
                                         override;
@@ -145,11 +145,11 @@ class OpenCdm : public OpenCdmInterface,
 
   // Handle the success/failure of a promise. These methods are responsible for
   // calling |host_| to resolve or reject the promise.
-  void OnSessionCreated(uint32 promise_id, const std::string& web_session_id);
-  void OnSessionLoaded(uint32 promise_id, const std::string& web_session_id);
-  void OnPromiseResolved(uint32 promise_id);
-  void OnPromiseFailed(uint32 promise_id, MediaKeys::Exception exception_code,
-                       uint32 system_code, const std::string& error_message);
+  void OnSessionCreated(uint32_t promise_id, const std::string& web_session_id);
+  void OnSessionLoaded(uint32_t promise_id, const std::string& web_session_id);
+  void OnPromiseResolved(uint32_t promise_id);
+  void OnPromiseFailed(uint32_t promise_id, MediaKeys::Exception exception_code,
+                       uint32_t system_code, const std::string& error_message);
 
   // Prepares next renewal message and sets a timer for it.
   void ScheduleNextRenewal();

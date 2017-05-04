@@ -45,7 +45,7 @@ class OpenCdmPlatformImpl : public OpenCdmPlatform,
 
   // EME equivalent: media_key_session_.update()
   MediaKeySessionUpdateResponse MediaKeySessionUpdate(
-      const uint8 *pbKey, uint32 cbKey, char *session_id_val,
+      const uint8_t *pbKey, uint32_t cbKey, char *session_id_val,
       uint32_t session_id_len) override;
 
   // EME equivalent: media_key_session_.release()

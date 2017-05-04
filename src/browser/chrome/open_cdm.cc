@@ -277,7 +277,7 @@ void OpenCdm::ReadyCallback(OpenCdmPlatformSessionId platform_session_id) {
       true, vector_as_array(&keys_vector), keys_vector.size());
 }
 
-void OpenCdm::LoadSession(uint32 promise_id,
+void OpenCdm::LoadSession(uint32_t promise_id,
                            cdm::SessionType session_type,
                            const char* web_session_id,
                            uint32_t web_session_id_length) {
@@ -285,7 +285,7 @@ void OpenCdm::LoadSession(uint32 promise_id,
         NOTIMPLEMENTED();
 }
 
-void OpenCdm::RemoveSession(uint32 promise_id,
+void OpenCdm::RemoveSession(uint32_t promise_id,
                                 const char* web_session_id,
                                 uint32_t web_session_id_length) {
   CDM_DLOG() << __FUNCTION__;
@@ -369,11 +369,11 @@ void OpenCdm::Initialize(bool allow_distinctive_identifier, bool allow_persisten
 
 }
 
-void OpenCdm::CreateSessionAndGenerateRequest(uint32 promise_id,
+void OpenCdm::CreateSessionAndGenerateRequest(uint32_t promise_id,
                                                cdm::SessionType session_type,
                                                cdm::InitDataType init_data_type,
                                                const uint8* init_data,
-                                               uint32 init_data_size) {
+                                               uint32_t init_data_size) {
   CDM_DLOG() << " OpenCdm::CreateSession promise_id: " << promise_id
              << " - session_type: " << session_type;
 
@@ -446,9 +446,9 @@ void OpenCdm::CreateSessionAndGenerateRequest(uint32 promise_id,
  return;
 }
 
-void OpenCdm::UpdateSession(uint32 promise_id, const char* web_session_id,
+void OpenCdm::UpdateSession(uint32_t promise_id, const char* web_session_id,
                             uint32_t web_session_id_size, const uint8* response,
-                            uint32 response_size) {
+                            uint32_t response_size) {
   CDM_DLOG() << " OpenCdm::UpdateSession for " << web_session_id;
 
   scoped_ptr<media::SimpleCdmPromise> promise(new media::CdmCallbackPromise<>(
@@ -499,7 +499,7 @@ void OpenCdm::ScheduleNextRenewal() {
     timer_delay_ms_ = std::min(2 * timer_delay_ms_, kMaxTimerDelayMs);
 }
 
-void OpenCdm::CloseSession(uint32 promise_id,
+void OpenCdm::CloseSession(uint32_t promise_id,
                             const char* web_session_id,
                             uint32_t web_session_id_length) {
 
@@ -527,7 +527,7 @@ void OpenCdm::CloseSession(uint32 promise_id,
   }
 }
 
-void OpenCdm::SetServerCertificate(uint32 promise_id,
+void OpenCdm::SetServerCertificate(uint32_t promise_id,
                                    const uint8_t* server_certificate_data,
                                    uint32_t server_certificate_data_size) {
   CDM_DLOG() << " OpenCdm::SetServerCertificate ";
@@ -599,7 +599,7 @@ cdm::Status OpenCdm::Decrypt(const cdm::InputBuffer& encrypted_buffer,
   return cdm::kSuccess;
 }
 
-void OpenCdm::OnPromiseResolved(uint32 promise_id) {
+void OpenCdm::OnPromiseResolved(uint32_t promise_id) {
   host_->OnResolvePromise(promise_id);
 }
 
@@ -924,7 +924,7 @@ void OpenCdm::OnQueryOutputProtectionStatus(
 };
 
 
-void OpenCdm::OnSessionCreated(uint32 promise_id,
+void OpenCdm::OnSessionCreated(uint32_t promise_id,
                                const std::string& web_session_id) {
   CDM_DLOG() << "OpenCdm::OnSessionCreated";
   // Save the latest session ID for heartbeat and file IO test messages.
@@ -934,14 +934,14 @@ void OpenCdm::OnSessionCreated(uint32 promise_id,
                                     web_session_id.length());
 }
 
-void OpenCdm::OnSessionLoaded(uint32 promise_id,
+void OpenCdm::OnSessionLoaded(uint32_t promise_id,
                               const std::string& web_session_id) {
   CDM_DLOG() << "OpenCdm::OnSessionLoaded";
 }
 
-void OpenCdm::OnPromiseFailed(uint32 promise_id,
+void OpenCdm::OnPromiseFailed(uint32_t promise_id,
                               MediaKeys::Exception exception_code,
-                              uint32 system_code,
+                              uint32_t system_code,
                               const std::string& error_message) {
   CDM_DLOG() << "OpenCdm::OnPromiseFailed";
 
