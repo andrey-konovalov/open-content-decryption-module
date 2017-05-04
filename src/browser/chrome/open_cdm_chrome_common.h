@@ -25,7 +25,7 @@
 #ifndef MEDIA_CDM_PPAPI_EXTERNAL_OPEN_CDM_BROWSER_CHROME_OPEN_CDM_CHROME_COMMON_H_
 #define MEDIA_CDM_PPAPI_EXTERNAL_OPEN_CDM_BROWSER_CHROME_OPEN_CDM_CHROME_COMMON_H_
 
-#include "media/cdm/ppapi/api/content_decryption_module.h"
+#include "media/cdm/api/content_decryption_module.h"
 
 namespace media {
 
