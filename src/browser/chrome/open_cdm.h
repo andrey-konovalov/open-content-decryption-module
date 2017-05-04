@@ -62,7 +62,7 @@ class OpenCdm : public OpenCdmInterface,
   void CreateSessionAndGenerateRequest(uint32_t promise_id,
                                                cdm::SessionType session_type,
                                                cdm::InitDataType init_data_type,
-                                               const uint8* init_data,
+                                               const uint8_t* init_data,
                                                uint32_t init_data_size) override;
 
   void LoadSession(uint32_t promise_id,
@@ -77,7 +77,7 @@ class OpenCdm : public OpenCdmInterface,
   void UpdateSession(uint32_t promise_id,
                              const char* web_session_id,
                              uint32_t web_session_id_length,
-                             const uint8* response,
+                             const uint8_t* response,
                              uint32_t response_size) override;
 
   void RemoveSession(uint32_t promise_id,
@@ -135,7 +135,7 @@ class OpenCdm : public OpenCdmInterface,
   // ContentDecryptionModule callbacks.
   void OnSessionMessage(const std::string& web_session_id,
                         MediaKeys::MessageType message_type,
-                        const std::vector<uint8>& message,
+                        const std::vector<uint8_t>& message,
                         const GURL& legacy_destination_url);
 
   void OnSessionKeysUpdate(const std::string& web_session_id,
