@@ -179,7 +179,7 @@ static cdm::Error ConvertException(media::MediaKeys::Exception exception_code) {
       case media::CdmKeyInformation::KeyStatus::EXPIRED:
         return cdm::kExpired;
       case media::CdmKeyInformation::KeyStatus::OUTPUT_RESTRICTED:
-        return cdm::kOutputRestricted
+        return cdm::kOutputRestricted;
       case media::CdmKeyInformation::KeyStatus::OUTPUT_DOWNSCALED:
         return cdm::kOutputDownscaled;
       case media::CdmKeyInformation::KeyStatus::KEY_STATUS_PENDING:
