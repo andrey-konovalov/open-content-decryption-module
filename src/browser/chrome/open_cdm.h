@@ -30,7 +30,6 @@
 #include <stdint.h>
 #include "base/containers/scoped_ptr_hash_map.h"
 #include "base/memory/ref_counted.h"
-#include "base/memory/scoped_ptr.h"
 #include "base/synchronization/lock.h"
 #include "media/base/decryptor.h"
 #include "media/base/media_export.h"
