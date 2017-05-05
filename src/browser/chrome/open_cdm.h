@@ -116,7 +116,7 @@ class OpenCdm : public OpenCdmInterface,
  private:
   OpenCdmHost* host_;
   OpenCdmMediaengine *media_engine_;
-  scoped_ptr<OpenCdmPlatform> platform_;
+  std::unique_ptr<OpenCdmPlatform> platform_;
   std::map<std::string, OpenCdmPlatformSessionId> session_id_map;
 
   // Todo: remove this. It is from old CDM
@@ -189,8 +189,8 @@ class OpenCdm : public OpenCdmInterface,
 
   std::string next_renewal_message_;
 #if defined(OCDM_USE_FFMPEG_DECODER)
-  scoped_ptr<FFmpegCdmAudioDecoder> audio_decoder_;
-  scoped_ptr<CdmVideoDecoder> video_decoder_;
+  std::unique_ptr<FFmpegCdmAudioDecoder> audio_decoder_;
+  std::unique_ptr<CdmVideoDecoder> video_decoder_;
 #endif  // OPEN_CDM_USE_FFMPEG_DECODER
 };
 
