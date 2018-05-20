@@ -132,7 +132,7 @@ class OpenCdm : public OpenCdmInterface,
 
   // ContentDecryptionModule callbacks.
   void OnSessionMessage(const std::string& web_session_id,
-                        ContentDecryptionModule::MessageType message_type,
+                        CdmMessageType message_type,
                         const std::vector<uint8_t>& message,
                         const GURL& legacy_destination_url);
 
