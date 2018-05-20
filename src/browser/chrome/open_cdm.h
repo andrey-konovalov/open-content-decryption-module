@@ -40,9 +40,9 @@
 #include "media/cdm/ppapi/external_open_cdm/src/cdm/open_cdm_platform_com_callback_receiver.h"
 #include "media/cdm/ppapi/external_open_cdm/src/mediaengine/open_cdm_mediaengine.h"
 
-#include "media/cdm/ppapi/external_clear_key/ffmpeg_cdm_audio_decoder.h"
-#include "media/cdm/ppapi/external_clear_key/ffmpeg_cdm_video_decoder.h"
-#include "media/cdm/ppapi/external_clear_key/cdm_video_decoder.h"
+#include "media/cdm/ppapi/clear_key_cdm/ffmpeg_cdm_audio_decoder.h"
+#include "media/cdm/ppapi/clear_key_cdm/ffmpeg_cdm_video_decoder.h"
+#include "media/cdm/ppapi/clear_key_cdm/cdm_video_decoder.h"
 
 #include "map"
 
