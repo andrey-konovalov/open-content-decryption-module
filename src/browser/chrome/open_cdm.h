@@ -30,9 +30,9 @@
 #include <stdint.h>
 #include "base/memory/ref_counted.h"
 #include "base/synchronization/lock.h"
+#include "media/base/content_decryption_module.h"
 #include "media/base/decryptor.h"
 #include "media/base/media_export.h"
-#include "media/base/media_keys.h"
 #include "media/base/decoder_buffer.h"
 
 #include "media/cdm/ppapi/external_open_cdm/src/browser/chrome/open_cdm_chrome_common.h"
@@ -54,7 +54,7 @@ class OpenCdm : public OpenCdmInterface,
   OpenCdm(OpenCdmHost* host, const std::string& key_system);
   ~OpenCdm() override;
 
-  // OpenDecryptor MediaKeys implementation
+  // OpenDecryptor ContentDecryptionModule implementation
   void Initialize(bool allow_distinctive_identifier,
                   bool allow_persistent_state) override;
   void CreateSessionAndGenerateRequest(uint32_t promise_id,
@@ -132,7 +132,7 @@ class OpenCdm : public OpenCdmInterface,
 
   // ContentDecryptionModule callbacks.
   void OnSessionMessage(const std::string& web_session_id,
-                        MediaKeys::MessageType message_type,
+                        ContentDecryptionModule::MessageType message_type,
                         const std::vector<uint8_t>& message,
                         const GURL& legacy_destination_url);
 
