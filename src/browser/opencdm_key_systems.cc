@@ -18,11 +18,11 @@
 #include "base/strings/string16.h"
 #include "media/base/eme_constants.h"
 #include "media/base/key_system_properties.h"
+#include "media/media_features.h"
 #include "opencdm_key_systems.h"
 using namespace media;
 
-#if defined(ENABLE_PEPPER_CDMS)
-
+#if BUILDFLAG(ENABLE_LIBRARY_CDMS)
 
 #ifdef OCDM_USE_PLAYREADY
 static const char kPlayreadyKeySystem[] =
