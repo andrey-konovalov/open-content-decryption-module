@@ -326,7 +326,7 @@ void OpenCdm::OnKeyStatusUpdateCallback(OpenCdmPlatformSessionId platform_sessio
   std::unique_ptr<base::Value> root(base::JSONReader().ReadToValue(message));
 
 
-  if (!root.get() || root->GetType() != base::Value::TYPE_DICTIONARY) {
+  if (!root.get() || root->type() != base::Value::Type::DICTIONARY) {
     return;
   }
   base::DictionaryValue* dict =
