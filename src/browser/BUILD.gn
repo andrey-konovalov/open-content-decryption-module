@@ -1,0 +1,94 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/config/features.gni")
+import("//media/cdm/ppapi/cdm_paths.gni")
+import("//media/media_options.gni")
+
+shared_library("opencdm") {
+  sources = [
+    "../browser/chrome/open_cdm.cc",
+    "../browser/chrome/open_cdm_chrome_common.h",
+    "../browser/chrome/open_cdm.h",
+    "../cdm/open_cdm_platform_com_callback_receiver.h",
+    "../cdm/open_cdm_platform_com.h",
+    "../cdm/open_cdm_platform_common.h",
+    "../cdm/open_cdm_platform_factory.h",
+    "../cdm/open_cdm_platform.h",
+    "../cdm/open_cdm_platform_impl.cc",
+    "../cdm/open_cdm_platform_impl.h",
+    "../com/cdm/open_cdm_platform_com_handler_factory.h",
+    "../com/cdm/rpc/rpc_cdm_platform_handler.cc",
+    "../com/cdm/rpc/rpc_cdm_platform_handler.h",
+    "../com/common/rpc/opencdm_callback.h",
+    "../com/common/rpc/opencdm_callback_xdr.c",
+    "../com/common/rpc/opencdm_xdr_clnt.c",
+    "../com/common/rpc/opencdm_xdr.h",
+    "../com/common/rpc/opencdm_xdr_xdr.c",
+    "../com/common/shmemsem/shmemsem_helper.cc",
+    "../com/common/shmemsem/shmemsem_helper.h",
+    "../com/mediaengine/rpc/rpc_cdm_mediaengine_handler.cc",
+    "../com/mediaengine/rpc/rpc_cdm_mediaengine_handler.h",
+    "../common/open_cdm_common.h",
+    "../mediaengine/open_cdm_mediaengine_com.h",
+    "../mediaengine/open_cdm_mediaengine_factory.h",
+    "../mediaengine/open_cdm_mediaengine.h",
+    "../mediaengine/open_cdm_mediaengine_impl.cc",
+    "../mediaengine/open_cdm_mediaengine_impl.h",
+  ]
+
+  # TODO(jschuh): crbug.com/167187 fix size_t to int truncations.
+  configs += [ "//build/config/compiler:no_size_t_to_int_warning" ]
+
+  defines = [ "CDM_IMPLEMENTATION" ]
+
+  deps = [
+#    ":cdm_proxy_common",
+    "//base",
+    "//build/config:exe_and_shlib_deps",
+    "//media",  # For media::AudioTimestampHelper
+    "//media:shared_memory_support",  # For media::AudioBus.
+    "//media/cdm:cdm_api",  # For content_decryption_module.h
+    "//url",
+  ]
+
+  if (media_use_ffmpeg) {
+    sources += [
+      "//media/cdm/ppapi/clear_key_cdm/ffmpeg_cdm_audio_decoder.cc",
+      "//media/cdm/ppapi/clear_key_cdm/ffmpeg_cdm_audio_decoder.h",
+      "//media/cdm/ppapi/clear_key_cdm/ffmpeg_cdm_video_decoder.cc",
+      "//media/cdm/ppapi/clear_key_cdm/ffmpeg_cdm_video_decoder.h",
+    ]
+    defines += [ "OCDM_USE_FFMPEG_DECODER" ]
+    deps += [ "//third_party/ffmpeg" ]
+  }
+
+  if (is_mac) {
+    ldflags = [ "-Wl,-install_name,@loader_path/libopencdm.dylib" ]
+  }
+}
+
+#TODO: ppapi_cdm_adapter("opencdmadapter") {
+shared_library("opencdmadapter") {
+  defines = [ "CHECK_DOCUMENT_URL" ]
+
+  deps = [
+    ":opencdm",
+  ]
+}
+
+static_library("renderer") {
+  sources = [
+    "opencdm_key_systems.cc",
+    "opencdm_key_systems.h",
+  ]
+
+  deps = [
+    "//base",
+#    "//components/cdm/common",
+#    "//content/public/renderer",
+    "//media",
+    "//media:media_features",   # for ENABLE_LIBRARY_CDMS
+  ]
+}
