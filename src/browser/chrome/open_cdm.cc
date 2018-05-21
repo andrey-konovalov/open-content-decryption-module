@@ -148,26 +148,28 @@ void INITIALIZE_CDM_MODULE() {
 void DeinitializeCdmModule() {
 }
 
-static cdm::Error ConvertException(media::MediaKeys::Exception exception_code) {
+static cdm::Error ConvertException(
+    media::CdmPromise::Exception exception_code) {
   switch (exception_code) {
-    case media::MediaKeys::NOT_SUPPORTED_ERROR:
+    case media::CdmPromise::NOT_SUPPORTED_ERROR:
       return cdm::kNotSupportedError;
-    case media::MediaKeys::INVALID_STATE_ERROR:
+    case media::CdmPromise::INVALID_STATE_ERROR:
       return cdm::kInvalidStateError;
-    case media::MediaKeys::INVALID_ACCESS_ERROR:
+    case media::CdmPromise::INVALID_ACCESS_ERROR:
       return cdm::kInvalidAccessError;
-    case media::MediaKeys::QUOTA_EXCEEDED_ERROR:
+    case media::CdmPromise::QUOTA_EXCEEDED_ERROR:
       return cdm::kQuotaExceededError;
-    case media::MediaKeys::UNKNOWN_ERROR:
+    case media::CdmPromise::UNKNOWN_ERROR:
       return cdm::kUnknownError;
-    case media::MediaKeys::CLIENT_ERROR:
+    case media::CdmPromise::CLIENT_ERROR:
       return cdm::kClientError;
-    case media::MediaKeys::OUTPUT_ERROR:
+    case media::CdmPromise::OUTPUT_ERROR:
       return cdm::kOutputError;
   }
   NOTIMPLEMENTED();
   return cdm::kUnknownError;
 }
+
   cdm::KeyStatus ConvertKeyStatus(media::CdmKeyInformation::KeyStatus status) {
     switch (status) {
       case media::CdmKeyInformation::KeyStatus::USABLE:
@@ -411,7 +413,7 @@ void OpenCdm::CreateSessionAndGenerateRequest(uint32_t promise_id,
         if (!ExtractKeyIdsFromKeyIdsInitData(init_data_string, &keys,
                                              &error_message)) {
           CDM_DLOG() << "Failed to extract keys";
-          promise->reject(MediaKeys::NOT_SUPPORTED_ERROR, 0, error_message);
+          promise->reject(CdmPromise::NOT_SUPPORTED_ERROR, 0, error_message);
           return;
         }
         break;
@@ -419,7 +421,7 @@ void OpenCdm::CreateSessionAndGenerateRequest(uint32_t promise_id,
       default:
         NOTREACHED();
         CDM_DLOG() << "init data type not supported";
-        promise->reject(MediaKeys::NOT_SUPPORTED_ERROR, 0,
+        promise->reject(CdmPromise::NOT_SUPPORTED_ERROR, 0,
                         "init_data_type not supported.");
         return;
     }
@@ -433,7 +435,7 @@ void OpenCdm::CreateSessionAndGenerateRequest(uint32_t promise_id,
     promise->resolve(web_session_id);
   } else {
     CDM_DLOG() << "reject create session promise";
-    promise->reject(media::MediaKeys::INVALID_STATE_ERROR,
+    promise->reject(CdmPromise::INVALID_STATE_ERROR,
                     response.platform_response,
                     "MediaKeySession could not be created.");
     return;
@@ -472,7 +474,7 @@ void OpenCdm::UpdateSession(uint32_t promise_id, const char* web_session_id,
         session_id_map[web_session_id].session_id_len);
     promise->resolve();
   } else {
-    promise->reject(media::MediaKeys::INVALID_ACCESS_ERROR, 0,
+    promise->reject(CdmPromise::INVALID_ACCESS_ERROR, 0,
                     "Session does not exist.");
     return;
   }
@@ -523,7 +525,7 @@ void OpenCdm::CloseSession(uint32_t promise_id,
     promise->resolve();
   } else {
     CDM_DLOG() << "Failed to delete session";
-    promise->reject(media::MediaKeys::INVALID_ACCESS_ERROR, 0,
+    promise->reject(CdmPromise::INVALID_ACCESS_ERROR, 0,
                     "Session does not exist.");
     return;
   }
@@ -943,7 +945,7 @@ void OpenCdm::OnSessionLoaded(uint32_t promise_id,
 }
 
 void OpenCdm::OnPromiseFailed(uint32_t promise_id,
-                              MediaKeys::Exception exception_code,
+                              CdmPromise::Exception exception_code,
                               uint32_t system_code,
                               const std::string& error_message) {
   CDM_DLOG() << "OpenCdm::OnPromiseFailed";

@@ -30,6 +30,7 @@
 #include <stdint.h>
 #include "base/memory/ref_counted.h"
 #include "base/synchronization/lock.h"
+#include "media/base/cdm_promise.h"
 #include "media/base/content_decryption_module.h"
 #include "media/base/decryptor.h"
 #include "media/base/media_export.h"
@@ -146,7 +147,8 @@ class OpenCdm : public OpenCdmInterface,
   void OnSessionCreated(uint32_t promise_id, const std::string& web_session_id);
   void OnSessionLoaded(uint32_t promise_id, const std::string& web_session_id);
   void OnPromiseResolved(uint32_t promise_id);
-  void OnPromiseFailed(uint32_t promise_id, MediaKeys::Exception exception_code,
+  void OnPromiseFailed(uint32_t promise_id,
+                       CdmPromise::Exception exception_code,
                        uint32_t system_code, const std::string& error_message);
 
   // Prepares next renewal message and sets a timer for it.
