@@ -439,15 +439,13 @@ void OpenCdm::CreateSessionAndGenerateRequest(uint32_t promise_id,
                     response.platform_response,
                     "MediaKeySession could not be created.");
     return;
-   }
-    /* Key request */
-   const GURL& legacy_destination_url = GURL::EmptyGURL();
-   host_->OnSessionMessage(web_session_id.data(), web_session_id.length(),
+  }
+  /* Key request */
+  host_->OnSessionMessage(web_session_id.data(), web_session_id.length(),
                           cdm::kLicenseRequest,
                           reinterpret_cast<const char*>(response.licence_req.data()),
-                          response.licence_req.size(), legacy_destination_url.spec().data(),
-                          legacy_destination_url.spec().size());
- return;
+                          response.licence_req.size(), nullptr, 0);
+  return;
 }
 
 void OpenCdm::UpdateSession(uint32_t promise_id, const char* web_session_id,
@@ -549,13 +547,9 @@ void OpenCdm::TimerExpired(void* context) {
     renewal_message = "ERROR: Invalid timer context found!";
   }
 
-  // This URL is only used for testing the code path for defaultURL.
-  // There is no service at this URL, so applications should ignore it.
-  const char url[] = "http://test.externalclearkey.chromium.org";
-
   host_->OnSessionMessage(last_session_id_.data(), last_session_id_.length(),
                           cdm::kLicenseRenewal, renewal_message.data(),
-                          renewal_message.length(), url, arraysize(url) - 1);
+                          renewal_message.length(), nullptr, 0);
 
   //ScheduleNextRenewal();
 }
