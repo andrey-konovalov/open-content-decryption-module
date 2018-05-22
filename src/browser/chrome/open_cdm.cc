@@ -23,6 +23,7 @@
 // found in the LICENSE file.
 
 #include "base/json/json_reader.h"
+#include "base/memory/ptr_util.h"
 #include "base/values.h"
 #include "media/cdm/ppapi/external_open_cdm/src/browser/chrome/open_cdm.h"
 
@@ -186,21 +187,23 @@ static cdm::Exception ConvertException(
     NOTREACHED();
     return cdm::kInternalError;
   }
-  // Shallow copy all the key information from |keys_info| into |keys_vector|.
-  // |keys_vector| is only valid for the lifetime of |keys_info| because it
-  // contains pointers into the latter.
-  void ConvertCdmKeysInfo(const std::vector<media::CdmKeyInformation*>& keys_info,
-                          std::vector<cdm::KeyInformation>* keys_vector) {
-    keys_vector->reserve(keys_info.size());
-    for (const auto& key_info : keys_info) {
-      cdm::KeyInformation key;
-      key.key_id = key_info->key_id.data();
-      key.key_id_size = key_info->key_id.size();
-      key.status = ConvertKeyStatus(key_info->status);
-      key.system_code = key_info->system_code;
-      keys_vector->push_back(key);
-    }
+
+// Shallow copy all the key information from |keys_info| into |keys_vector|.
+// |keys_vector| is only valid for the lifetime of |keys_info| because it
+// contains pointers into the latter.
+void ConvertCdmKeysInfo(const media::CdmKeysInfo& keys_info,
+                        std::vector<cdm::KeyInformation>* keys_vector) {
+  keys_vector->reserve(keys_info.size());
+  for (const auto& key_info : keys_info) {
+    cdm::KeyInformation key;
+    key.key_id = key_info->key_id.data();
+    key.key_id_size = key_info->key_id.size();
+    key.status = ConvertKeyStatus(key_info->status);
+    key.system_code = key_info->system_code;
+    keys_vector->push_back(key);
   }
+}
+
 void* CreateCdmInstance(int cdm_interface_version, const char* key_system,
                         uint32_t key_system_size,
                         GetCdmHostFunc get_cdm_host_func, void* user_data) {
@@ -332,17 +335,13 @@ void OpenCdm::OnKeyStatusUpdateCallback(OpenCdmPlatformSessionId platform_sessio
   for (base::DictionaryValue::Iterator itr(*dict); !itr.IsAtEnd();
         itr.Advance())
   {
-    std::unique_ptr<CdmKeyInformation> key_info(new CdmKeyInformation);
-    key_info->key_id.assign(itr.key().begin(), itr.key().end());
-
     /* FIXME: We ignore returned key statuses. Set all keys usable.
      * We have to pull in the key status defines from cdmi.h to
      * process the returned key states properly.
      */
-
-    key_info->status = CdmKeyInformation::USABLE;
-    key_info->system_code = 0;
-    keys_info.push_back(key_info.release());
+    std::vector<uint8_t> key_id(itr.key().begin(), itr.key().end());
+    keys_info.push_back(base::MakeUnique<CdmKeyInformation>(
+        key_id, CdmKeyInformation::USABLE, 0));
   }
   OnSessionKeysUpdate(GetChromeSessionId(platform_session_id), true, std::move(keys_info));
   CDM_DLOG() << "Got key status update : %s:" << message;
@@ -354,7 +353,7 @@ void OpenCdm::OnSessionKeysUpdate(const std::string& session_id,
     std::string new_session_id = session_id;
 
     std::vector<cdm::KeyInformation> keys_vector;
-    ConvertCdmKeysInfo(keys_info.get(), &keys_vector);
+    ConvertCdmKeysInfo(keys_info, &keys_vector);
     host_->OnSessionKeysChange(new_session_id.data(), new_session_id.length(),
                                has_additional_usable_key,
                                keys_vector.data(), keys_vector.size());
