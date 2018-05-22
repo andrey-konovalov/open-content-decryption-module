@@ -604,7 +604,7 @@ cdm::Status OpenCdm::InitializeAudioDecoder(
 
   if (!audio_decoder_->Initialize(audio_decoder_config)) {
     CDM_DLOG() << "audio_decoder_->Initialize failed";
-    return cdm::kSessionError;
+    return cdm::kInitializationError;
   }
 
   return cdm::kSuccess;
@@ -615,7 +615,7 @@ cdm::Status OpenCdm::InitializeAudioDecoder(
   return cdm::kSuccess;
 #else
   NOTIMPLEMENTED();
-  return cdm::kSessionError;
+  return cdm::kInitializationError;
 #endif
 }
 
@@ -628,19 +628,19 @@ cdm::Status OpenCdm::InitializeVideoDecoder(
   if (video_decoder_ && video_decoder_->is_initialized()) {
     DCHECK(!video_decoder_->is_initialized());
     CDM_DLOG() << "video_decoder_->is_initialized() failed\n";
-    return cdm::kSessionError;
+    return cdm::kInitializationError;
   }
   // Any uninitialized decoder will be replaced.
   video_decoder_ = CreateVideoDecoder(host_, video_decoder_config);
   if (!video_decoder_) {
     CDM_DLOG() << "CreateVideoDecoder failed\n";
-    return cdm::kSessionError;
+    return cdm::kInitializationError;
   }
 
   return cdm::kSuccess;
 #else
   NOTIMPLEMENTED();
-  return cdm::kSessionError;
+  return cdm::kInitializationError;
 #endif  // OCDM_USE_FFMPEG_DECODER
 }
 
