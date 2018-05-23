@@ -366,6 +366,13 @@ void OpenCdm::Initialize(bool allow_distinctive_identifier, bool allow_persisten
 
 }
 
+void OpenCdm::GetStatusForPolicy(uint32_t promise_id,
+                                 const cdm::Policy& policy) {
+  NOTREACHED() << "GetStatusForPolicy() called unexpectedly.";
+  OnPromiseFailed(promise_id, CdmPromise::Exception::INVALID_STATE_ERROR, 0,
+                  "GetStatusForPolicy() called unexpectedly.");
+}
+
 void OpenCdm::CreateSessionAndGenerateRequest(uint32_t promise_id,
                                                cdm::SessionType session_type,
                                                cdm::InitDataType init_data_type,
@@ -437,7 +444,7 @@ void OpenCdm::CreateSessionAndGenerateRequest(uint32_t promise_id,
   host_->OnSessionMessage(web_session_id.data(), web_session_id.length(),
                           cdm::kLicenseRequest,
                           reinterpret_cast<const char*>(response.licence_req.data()),
-                          response.licence_req.size(), nullptr, 0);
+                          response.licence_req.size());
   return;
 }
 
@@ -542,7 +549,7 @@ void OpenCdm::TimerExpired(void* context) {
 
   host_->OnSessionMessage(last_session_id_.data(), last_session_id_.length(),
                           cdm::kLicenseRenewal, renewal_message.data(),
-                          renewal_message.length(), nullptr, 0);
+                          renewal_message.length());
 
   //ScheduleNextRenewal();
 }
@@ -915,6 +922,11 @@ void OpenCdm::OnQueryOutputProtectionStatus(
   NOTIMPLEMENTED();
 };
 
+void OpenCdm::OnStorageId(uint32_t version,
+                          const uint8_t* storage_id,
+                          uint32_t storage_id_size) {
+  NOTREACHED() << "OnStorageId() called unexpectedly.";
+}
 
 void OpenCdm::OnSessionCreated(uint32_t promise_id,
                                const std::string& web_session_id) {

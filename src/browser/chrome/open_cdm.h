@@ -58,11 +58,13 @@ class OpenCdm : public OpenCdmInterface,
   // OpenDecryptor ContentDecryptionModule implementation
   void Initialize(bool allow_distinctive_identifier,
                   bool allow_persistent_state) override;
+  void GetStatusForPolicy(uint32_t promise_id,
+                          const cdm::Policy& policy) override;
   void CreateSessionAndGenerateRequest(uint32_t promise_id,
-                                               cdm::SessionType session_type,
-                                               cdm::InitDataType init_data_type,
-                                               const uint8_t* init_data,
-                                               uint32_t init_data_size) override;
+                                       cdm::SessionType session_type,
+                                       cdm::InitDataType init_data_type,
+                                       const uint8_t* init_data,
+                                       uint32_t init_data_size) override;
 
   void LoadSession(uint32_t promise_id,
                            cdm::SessionType session_type,
@@ -97,13 +99,10 @@ class OpenCdm : public OpenCdmInterface,
       const cdm::VideoDecoderConfig& video_decoder_config) override;
   void DeinitializeDecoder(cdm::StreamType decoder_type) override;
   void ResetDecoder(cdm::StreamType decoder_type) override;
-  cdm::Status DecryptAndDecodeFrame(
-      const cdm::InputBuffer& encrypted_buffer,
-      cdm::VideoFrame* me)
-          override;
-  cdm::Status DecryptAndDecodeSamples(
-      const cdm::InputBuffer& encrypted_buffer, cdm::AudioFrames* audio_frames)
-          override;
+  cdm::Status DecryptAndDecodeFrame(const cdm::InputBuffer& encrypted_buffer,
+                                    cdm::VideoFrame* video_frame) override;
+  cdm::Status DecryptAndDecodeSamples(const cdm::InputBuffer& encrypted_buffer,
+                                      cdm::AudioFrames* audio_frames) override;
   void Destroy() override;
   void OnPlatformChallengeResponse(
       const cdm::PlatformChallengeResponse& response) override;
@@ -112,7 +111,9 @@ class OpenCdm : public OpenCdmInterface,
       cdm::QueryResult result,
       uint32_t link_mask,
       uint32_t output_protection_mask) override;
-
+  void OnStorageId(uint32_t version,
+                   const uint8_t* storage_id,
+                   uint32_t storage_id_size) override;
  private:
   OpenCdmHost* host_;
   OpenCdmMediaengine *media_engine_;
