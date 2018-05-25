@@ -25,6 +25,8 @@
 #include "base/json/json_reader.h"
 #include "base/memory/ptr_util.h"
 #include "base/values.h"
+#include "media/cdm/ppapi/clear_key_cdm/cdm_host_proxy.h"
+#include "media/cdm/ppapi/clear_key_cdm/cdm_host_proxy_impl.h"
 #include "media/cdm/ppapi/external_open_cdm/src/browser/chrome/open_cdm.h"
 
 // Include FFmpeg avformat.h for av_register_all().
@@ -210,18 +212,34 @@ void* CreateCdmInstance(int cdm_interface_version, const char* key_system,
   std::string key_system_string(key_system, key_system_size);
 
   if (key_system_string != media::kExternalOpenCdmKeySystem) {
-    return NULL;
+    return nullptr;
   }
 
-  if (cdm_interface_version != media::OpenCdmInterface::kVersion)
-    return NULL;
+  // We support both CDM_9 and CDM_10.
+  using CDM_9 = cdm::ContentDecryptionModule_9;
+  using CDM_10 = cdm::ContentDecryptionModule_10;
 
-  media::OpenCdmHost* host = static_cast<media::OpenCdmHost*>(get_cdm_host_func(
-      media::OpenCdmHost::kVersion, user_data));
-  if (!host)
-    return NULL;
+  if (cdm_interface_version == CDM_9::kVersion) {
+    CDM_9::Host* host = static_cast<CDM_9::Host*>(
+        get_cdm_host_func(CDM_9::Host::kVersion, user_data));
+    if (!host)
+      return nullptr;
 
-  return new media::OpenCdm(host, key_system_string);
+    DVLOG(1) << __func__ << ": Create OpenCdm with CDM_9::Host.";
+    return new media::OpenCdm(host, key_system_string);
+  }
+
+  if (cdm_interface_version == CDM_10::kVersion) {
+    CDM_10::Host* host = static_cast<CDM_10::Host*>(
+        get_cdm_host_func(CDM_10::Host::kVersion, user_data));
+    if (!host)
+      return nullptr;
+
+    DVLOG(1) << __func__ << ": Create OpenCdm with CDM_10::Host.";
+    return new media::OpenCdm(host, key_system_string);
+  }
+
+  return nullptr;
 }
 
 const char* GetCdmVersion() {
@@ -246,8 +264,9 @@ static std::string ConvertInitDataType(
 
 static uint32_t next_web_session_id_ = 1;
 
-OpenCdm::OpenCdm(OpenCdmHost* host, const std::string& key_system)
-    : host_(host),
+template <typename HostInterface>
+OpenCdm::OpenCdm(HostInterface* host, const std::string& key_system)
+    : cdm_host_proxy_(new CdmHostProxyImpl<HostInterface>(host)),
       media_engine_(NULL),
       key_system_(key_system),
       timer_delay_ms_(kInitialTimerDelayMs),
@@ -274,8 +293,8 @@ void OpenCdm::ReadyCallback(OpenCdmPlatformSessionId platform_session_id) {
 
   std::string web_session_id = GetChromeSessionId(platform_session_id);
   std::vector<cdm::KeyInformation> keys_vector;
-  host_->OnSessionKeysChange(web_session_id.data(), web_session_id.length(),
-      true, keys_vector.data(), keys_vector.size());
+  cdm_host_proxy_->OnSessionKeysChange(web_session_id.data(),
+      web_session_id.length(), true, keys_vector.data(), keys_vector.size());
 }
 
 void OpenCdm::LoadSession(uint32_t promise_id,
@@ -311,8 +330,8 @@ void OpenCdm::MessageCallback(OpenCdmPlatformSessionId platform_session_id,
    CDM_DLOG() << ".. Request LicenseRequest\n";
    //FIXME: the actual message is stored in the destination_rul
 
-   host_->OnSessionMessage(web_session_id.data(), web_session_id.length(),
-                          cdm::kLicenseRequest,
+   cdm_host_proxy_->OnSessionMessage(web_session_id.data(),
+                          web_session_id.length(), cdm::kLicenseRequest,
                           reinterpret_cast<const char*>(destination_url.data()),
                           destination_url.size(), legacy_destination_url.spec().data(),
                           legacy_destination_url.spec().size());
@@ -354,7 +373,8 @@ void OpenCdm::OnSessionKeysUpdate(const std::string& session_id,
 
     std::vector<cdm::KeyInformation> keys_vector;
     ConvertCdmKeysInfo(keys_info, &keys_vector);
-    host_->OnSessionKeysChange(new_session_id.data(), new_session_id.length(),
+    cdm_host_proxy_->OnSessionKeysChange(new_session_id.data(),
+                               new_session_id.length(),
                                has_additional_usable_key,
                                keys_vector.data(), keys_vector.size());
     CDM_DLOG() << "Session keys updated" ;
@@ -441,7 +461,8 @@ void OpenCdm::CreateSessionAndGenerateRequest(uint32_t promise_id,
     return;
   }
   /* Key request */
-  host_->OnSessionMessage(web_session_id.data(), web_session_id.length(),
+  cdm_host_proxy_->OnSessionMessage(web_session_id.data(),
+                          web_session_id.length(),
                           cdm::kLicenseRequest,
                           reinterpret_cast<const char*>(response.licence_req.data()),
                           response.licence_req.size());
@@ -490,10 +511,10 @@ void OpenCdm::UpdateSession(uint32_t promise_id, const char* web_session_id,
 void OpenCdm::ScheduleNextRenewal() {
   std::ostringstream msg_stream;
   msg_stream << kRenewalHeader << " from OpenCDM set at time "
-             << host_->GetCurrentWallTime() << ".";
+             << cdm_host_proxy_->GetCurrentWallTime() << ".";
   next_renewal_message_ = msg_stream.str();
 
-  host_->SetTimer(timer_delay_ms_, &next_renewal_message_[0]);
+  cdm_host_proxy_->SetTimer(timer_delay_ms_, &next_renewal_message_[0]);
 
   // Use a smaller timer delay at start-up to facilitate testing. Increase the
   // timer delay up to a limit to avoid message spam.
@@ -547,7 +568,8 @@ void OpenCdm::TimerExpired(void* context) {
     renewal_message = "ERROR: Invalid timer context found!";
   }
 
-  host_->OnSessionMessage(last_session_id_.data(), last_session_id_.length(),
+  cdm_host_proxy_->OnSessionMessage(
+                          last_session_id_.data(), last_session_id_.length(),
                           cdm::kLicenseRenewal, renewal_message.data(),
                           renewal_message.length());
 
@@ -588,7 +610,8 @@ cdm::Status OpenCdm::Decrypt(const cdm::InputBuffer& encrypted_buffer,
     return status;
 
   DCHECK(buffer->data());
-  decrypted_block->SetDecryptedBuffer(host_->Allocate(buffer->data_size()));
+  decrypted_block->SetDecryptedBuffer(
+      cdm_host_proxy_->Allocate(buffer->data_size()));
   memcpy(reinterpret_cast<void*>(decrypted_block->DecryptedBuffer()->Data()),
          buffer->data(), buffer->data_size());
   decrypted_block->DecryptedBuffer()->SetSize(buffer->data_size());
@@ -598,7 +621,7 @@ cdm::Status OpenCdm::Decrypt(const cdm::InputBuffer& encrypted_buffer,
 }
 
 void OpenCdm::OnPromiseResolved(uint32_t promise_id) {
-  host_->OnResolvePromise(promise_id);
+  cdm_host_proxy_->OnResolvePromise(promise_id);
 }
 
 cdm::Status OpenCdm::InitializeAudioDecoder(
@@ -607,7 +630,8 @@ cdm::Status OpenCdm::InitializeAudioDecoder(
 
 #if defined(OCDM_USE_FFMPEG_DECODER)
   if (!audio_decoder_)
-    audio_decoder_.reset(new media::FFmpegCdmAudioDecoder(host_));
+    audio_decoder_.reset(
+        new media::FFmpegCdmAudioDecoder(cdm_host_proxy_.get()));
 
   if (!audio_decoder_->Initialize(audio_decoder_config)) {
     CDM_DLOG() << "audio_decoder_->Initialize failed";
@@ -638,7 +662,8 @@ cdm::Status OpenCdm::InitializeVideoDecoder(
     return cdm::kInitializationError;
   }
   // Any uninitialized decoder will be replaced.
-  video_decoder_ = CreateVideoDecoder(host_, video_decoder_config);
+  video_decoder_ =
+      CreateVideoDecoder(cdm_host_proxy_.get(), video_decoder_config);
   if (!video_decoder_) {
     CDM_DLOG() << "CreateVideoDecoder failed\n";
     return cdm::kInitializationError;
@@ -934,8 +959,9 @@ void OpenCdm::OnSessionCreated(uint32_t promise_id,
   // Save the latest session ID for heartbeat and file IO test messages.
   last_session_id_ = web_session_id;
 
-  host_->OnResolveNewSessionPromise(promise_id, web_session_id.data(),
-                                    web_session_id.length());
+  cdm_host_proxy_->OnResolveNewSessionPromise(promise_id,
+                                              web_session_id.data(),
+                                              web_session_id.length());
 }
 
 void OpenCdm::OnSessionLoaded(uint32_t promise_id,
@@ -949,9 +975,10 @@ void OpenCdm::OnPromiseFailed(uint32_t promise_id,
                               const std::string& error_message) {
   CDM_DLOG() << "OpenCdm::OnPromiseFailed";
 
-  host_->OnRejectPromise(promise_id, ConvertException(exception_code),
-                         system_code, error_message.data(),
-                         error_message.length());
+  cdm_host_proxy_->OnRejectPromise(promise_id,
+                                   ConvertException(exception_code),
+                                   system_code, error_message.data(),
+                                   error_message.length());
 }
 
 }  // namespace media

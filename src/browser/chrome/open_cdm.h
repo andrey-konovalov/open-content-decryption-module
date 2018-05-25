@@ -36,26 +36,30 @@
 #include "media/base/media_export.h"
 #include "media/base/decoder_buffer.h"
 
-#include "media/cdm/ppapi/external_open_cdm/src/browser/chrome/open_cdm_chrome_common.h"
 #include "media/cdm/ppapi/external_open_cdm/src/cdm/open_cdm_platform.h"
 #include "media/cdm/ppapi/external_open_cdm/src/cdm/open_cdm_platform_com_callback_receiver.h"
 #include "media/cdm/ppapi/external_open_cdm/src/mediaengine/open_cdm_mediaengine.h"
 
+#include "media/cdm/ppapi/clear_key_cdm/cdm_video_decoder.h"
 #include "media/cdm/ppapi/clear_key_cdm/ffmpeg_cdm_audio_decoder.h"
 #include "media/cdm/ppapi/clear_key_cdm/ffmpeg_cdm_video_decoder.h"
-#include "media/cdm/ppapi/clear_key_cdm/cdm_video_decoder.h"
 
 #include "map"
 
 namespace media {
 
-class OpenCdm : public OpenCdmInterface,
+class CdmHostProxy;
+
+// OpenCDM implementation of the cdm::ContentDecryptionModule interfaces.
+class OpenCdm : public cdm::ContentDecryptionModule_9,
+    public cdm::ContentDecryptionModule_10,
     public OpenCdmPlatformComCallbackReceiver {
  public:
-  OpenCdm(OpenCdmHost* host, const std::string& key_system);
+  template <typename HostInterface>
+  OpenCdm(HostInterface* host, const std::string& key_system);
   ~OpenCdm() override;
 
-  // OpenDecryptor ContentDecryptionModule implementation
+  // cdm::ContentDecryptionModule implementation
   void Initialize(bool allow_distinctive_identifier,
                   bool allow_persistent_state) override;
   void GetStatusForPolicy(uint32_t promise_id,
@@ -114,8 +118,9 @@ class OpenCdm : public OpenCdmInterface,
   void OnStorageId(uint32_t version,
                    const uint8_t* storage_id,
                    uint32_t storage_id_size) override;
+
  private:
-  OpenCdmHost* host_;
+  std::unique_ptr<CdmHostProxy> cdm_host_proxy_;
   OpenCdmMediaengine *media_engine_;
   std::unique_ptr<OpenCdmPlatform> platform_;
   std::map<std::string, OpenCdmPlatformSessionId> session_id_map;
@@ -142,7 +147,7 @@ class OpenCdm : public OpenCdmInterface,
   void OnSessionClosed(const std::string& web_session_id);
 
   // Handle the success/failure of a promise. These methods are responsible for
-  // calling |host_| to resolve or reject the promise.
+  // calling |cdm_host_proxy_| to resolve or reject the promise.
   void OnSessionCreated(uint32_t promise_id, const std::string& web_session_id);
   void OnSessionLoaded(uint32_t promise_id, const std::string& web_session_id);
   void OnPromiseResolved(uint32_t promise_id);
@@ -180,7 +185,7 @@ class OpenCdm : public OpenCdmInterface,
   virtual std::string GetChromeSessionId(
       OpenCdmPlatformSessionId platform_session_id);
 
-  // Timer delay in milliseconds for the next host_->SetTimer() call.
+  // Timer delay in milliseconds for the next cdm_host_proxy_->SetTimer() call.
   int64_t timer_delay_ms_;
 
   // Indicates whether a renewal timer has been set to prevent multiple timers
