@@ -8,8 +8,11 @@ import("//media/media_options.gni")
 
 shared_library("opencdm") {
   sources = [
+    "../../../clear_key_cdm/cdm_host_proxy.h",
+    "../../../clear_key_cdm/cdm_host_proxy_impl.h",
+    "../../../clear_key_cdm/cdm_video_decoder.cc",
+    "../../../clear_key_cdm/cdm_video_decoder.h",
     "../browser/chrome/open_cdm.cc",
-    "../browser/chrome/open_cdm_chrome_common.h",
     "../browser/chrome/open_cdm.h",
     "../cdm/open_cdm_platform_com_callback_receiver.h",
     "../cdm/open_cdm_platform_com.h",
@@ -44,7 +47,7 @@ shared_library("opencdm") {
   defines = [ "CDM_IMPLEMENTATION" ]
 
   deps = [
-#    ":cdm_proxy_common",
+    "//media/cdm/ppapi/clear_key_cdm:cdm_proxy_common",
     "//base",
     "//build/config:exe_and_shlib_deps",
     "//media",  # For media::AudioTimestampHelper
@@ -60,7 +63,7 @@ shared_library("opencdm") {
       "//media/cdm/ppapi/clear_key_cdm/ffmpeg_cdm_video_decoder.cc",
       "//media/cdm/ppapi/clear_key_cdm/ffmpeg_cdm_video_decoder.h",
     ]
-    defines += [ "OCDM_USE_FFMPEG_DECODER" ]
+    defines += [ "OCDM_USE_FFMPEG_DECODER", "CLEAR_KEY_CDM_USE_FFMPEG_DECODER" ]
     deps += [ "//third_party/ffmpeg" ]
   }
 
