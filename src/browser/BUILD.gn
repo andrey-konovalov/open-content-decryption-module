@@ -4,6 +4,7 @@
 
 import("//build/config/features.gni")
 import("//media/cdm/ppapi/cdm_paths.gni")
+import("//media/cdm/ppapi/ppapi_cdm_adapter.gni")
 import("//media/media_options.gni")
 
 shared_library("opencdm") {
@@ -72,12 +73,14 @@ shared_library("opencdm") {
   }
 }
 
-#TODO: ppapi_cdm_adapter("opencdmadapter") {
-shared_library("opencdmadapter") {
+ppapi_cdm_adapter("opencdmadapter") {
   defines = [ "CHECK_DOCUMENT_URL" ]
 
   deps = [
     ":opencdm",
+    "//base",
+    "//media:shared_memory_support",
+    "//ui/gfx/geometry",
   ]
 }
 
