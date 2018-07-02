@@ -1,9 +1,46 @@
+From 8dca9a1015da8d7f5add30d38f6443be946d73c7 Mon Sep 17 00:00:00 2001
 From: Andrey Konovalov <andrey.konovalov@linaro.org>
 Date: Fri, 28 Apr 2017 21:37:37 +0300
 Subject: [PATCH] OCDM patch for chromium-65.0.3315.0.r527534.igalia.1
 
 ---
+ chrome/BUILD.gn                                      | 2 ++
+ chrome/renderer/BUILD.gn                             | 1 +
+ chrome/renderer/media/chrome_key_systems_provider.cc | 3 +++
+ 3 files changed, 6 insertions(+)
 
+diff --git a/chrome/BUILD.gn b/chrome/BUILD.gn
+index 960921a..d165ad1 100644
+--- a/chrome/BUILD.gn
++++ b/chrome/BUILD.gn
+@@ -18,6 +18,7 @@ import("//chrome/common/features.gni")
+ import("//chrome/process_version_rc_template.gni")
+ import("//components/nacl/features.gni")
+ import("//extensions/features/features.gni")
++import("//media/cdm/ppapi/external_open_cdm/opencdm.gni")
+ import("//media/media_options.gni")
+ import("//ppapi/features/features.gni")
+ import("//third_party/WebKit/public/public_features.gni")
+@@ -305,6 +306,7 @@ if (!is_android && !is_mac) {
+       data_deps += [
+         "//chrome/browser/resources/media/mei_preload:component",
+         "//third_party/widevine/cdm:widevinecdmadapter",
++        "//media/cdm/ppapi/external_open_cdm/src/browser:opencdmadapter",
+       ]
+ 
+       if (is_multi_dll_chrome) {
+diff --git a/chrome/renderer/BUILD.gn b/chrome/renderer/BUILD.gn
+index cffc929..2b9f5b8 100644
+--- a/chrome/renderer/BUILD.gn
++++ b/chrome/renderer/BUILD.gn
+@@ -138,6 +138,7 @@ static_library("renderer") {
+     "//media",
+     "//media:media_features",
+     "//media/capture",
++    "//media/cdm/ppapi/external_open_cdm/src/browser:opencdm_ks",
+     "//mojo/public/cpp/bindings",
+     "//net",
+     "//ppapi/features",
 diff --git a/chrome/renderer/media/chrome_key_systems_provider.cc b/chrome/renderer/media/chrome_key_systems_provider.cc
 index e2a90b7..45f3c07 100644
 --- a/chrome/renderer/media/chrome_key_systems_provider.cc
@@ -25,17 +62,6 @@ index e2a90b7..45f3c07 100644
    }
  
    has_updated_ = true;
-diff --git a/chrome/renderer/BUILD.gn b/chrome/renderer/BUILD.gn
-index cffc929..dbb1c4e 100644
---- a/chrome/renderer/BUILD.gn
-+++ b/chrome/renderer/BUILD.gn
-@@ -138,6 +138,7 @@ static_library("renderer") {
-     "//media",
-     "//media:media_features",
-     "//media/capture",
-+    "//media/cdm/ppapi/external_open_cdm/src/browser:renderer",
-     "//mojo/public/cpp/bindings",
-     "//net",
-     "//ppapi/features",
 -- 
 2.7.4
+

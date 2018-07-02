@@ -4,87 +4,111 @@
 
 import("//build/config/features.gni")
 import("//media/cdm/ppapi/cdm_paths.gni")
+import("//media/cdm/ppapi/external_open_cdm/opencdm.gni")
 import("//media/cdm/ppapi/ppapi_cdm_adapter.gni")
 import("//media/media_options.gni")
 
-shared_library("opencdm") {
-  sources = [
-    "../../../clear_key_cdm/cdm_host_proxy.h",
-    "../../../clear_key_cdm/cdm_host_proxy_impl.h",
-    "../../../clear_key_cdm/cdm_video_decoder.cc",
-    "../../../clear_key_cdm/cdm_video_decoder.h",
-    "../browser/chrome/open_cdm.cc",
-    "../browser/chrome/open_cdm.h",
-    "../cdm/open_cdm_platform_com_callback_receiver.h",
-    "../cdm/open_cdm_platform_com.h",
-    "../cdm/open_cdm_platform_common.h",
-    "../cdm/open_cdm_platform_factory.h",
-    "../cdm/open_cdm_platform.h",
-    "../cdm/open_cdm_platform_impl.cc",
-    "../cdm/open_cdm_platform_impl.h",
-    "../com/cdm/open_cdm_platform_com_handler_factory.h",
-    "../com/cdm/rpc/rpc_cdm_platform_handler.cc",
-    "../com/cdm/rpc/rpc_cdm_platform_handler.h",
-    "../com/common/rpc/opencdm_callback.h",
-    "../com/common/rpc/opencdm_callback_xdr.c",
-    "../com/common/rpc/opencdm_xdr_clnt.c",
-    "../com/common/rpc/opencdm_xdr.h",
-    "../com/common/rpc/opencdm_xdr_xdr.c",
-    "../com/common/shmemsem/shmemsem_helper.cc",
-    "../com/common/shmemsem/shmemsem_helper.h",
-    "../com/mediaengine/rpc/rpc_cdm_mediaengine_handler.cc",
-    "../com/mediaengine/rpc/rpc_cdm_mediaengine_handler.h",
-    "../common/open_cdm_common.h",
-    "../mediaengine/open_cdm_mediaengine_com.h",
-    "../mediaengine/open_cdm_mediaengine_factory.h",
-    "../mediaengine/open_cdm_mediaengine.h",
-    "../mediaengine/open_cdm_mediaengine_impl.cc",
-    "../mediaengine/open_cdm_mediaengine_impl.h",
-  ]
-
-  # TODO(jschuh): crbug.com/167187 fix size_t to int truncations.
-  configs += [ "//build/config/compiler:no_size_t_to_int_warning" ]
-
-  defines = [ "CDM_IMPLEMENTATION" ]
-
-  deps = [
-    "//media/cdm/ppapi/clear_key_cdm:cdm_proxy_common",
-    "//base",
-    "//build/config:exe_and_shlib_deps",
-    "//media",  # For media::AudioTimestampHelper
-    "//media:shared_memory_support",  # For media::AudioBus.
-    "//media/cdm:cdm_api",  # For content_decryption_module.h
-    "//url",
-  ]
-
-  if (media_use_ffmpeg) {
-    sources += [
-      "//media/cdm/ppapi/clear_key_cdm/ffmpeg_cdm_audio_decoder.cc",
-      "//media/cdm/ppapi/clear_key_cdm/ffmpeg_cdm_audio_decoder.h",
-      "//media/cdm/ppapi/clear_key_cdm/ffmpeg_cdm_video_decoder.cc",
-      "//media/cdm/ppapi/clear_key_cdm/ffmpeg_cdm_video_decoder.h",
+if (enable_opencdm && enable_library_cdms) {
+  shared_library("opencdm") {
+    sources = [
+      "../../../clear_key_cdm/cdm_host_proxy.h",
+      "../../../clear_key_cdm/cdm_host_proxy_impl.h",
+      "../../../clear_key_cdm/cdm_video_decoder.cc",
+      "../../../clear_key_cdm/cdm_video_decoder.h",
+      "../browser/chrome/open_cdm.cc",
+      "../browser/chrome/open_cdm.h",
+      "../cdm/open_cdm_platform_com_callback_receiver.h",
+      "../cdm/open_cdm_platform_com.h",
+      "../cdm/open_cdm_platform_common.h",
+      "../cdm/open_cdm_platform_factory.h",
+      "../cdm/open_cdm_platform.h",
+      "../cdm/open_cdm_platform_impl.cc",
+      "../cdm/open_cdm_platform_impl.h",
+      "../com/cdm/open_cdm_platform_com_handler_factory.h",
+      "../com/cdm/rpc/rpc_cdm_platform_handler.cc",
+      "../com/cdm/rpc/rpc_cdm_platform_handler.h",
+      "../com/common/rpc/opencdm_callback.h",
+      "../com/common/rpc/opencdm_callback_xdr.c",
+      "../com/common/rpc/opencdm_xdr_clnt.c",
+      "../com/common/rpc/opencdm_xdr.h",
+      "../com/common/rpc/opencdm_xdr_xdr.c",
+      "../com/common/shmemsem/shmemsem_helper.cc",
+      "../com/common/shmemsem/shmemsem_helper.h",
+      "../com/mediaengine/rpc/rpc_cdm_mediaengine_handler.cc",
+      "../com/mediaengine/rpc/rpc_cdm_mediaengine_handler.h",
+      "../common/open_cdm_common.h",
+      "../mediaengine/open_cdm_mediaengine_com.h",
+      "../mediaengine/open_cdm_mediaengine_factory.h",
+      "../mediaengine/open_cdm_mediaengine.h",
+      "../mediaengine/open_cdm_mediaengine_impl.cc",
+      "../mediaengine/open_cdm_mediaengine_impl.h",
     ]
-    defines += [ "OCDM_USE_FFMPEG_DECODER", "CLEAR_KEY_CDM_USE_FFMPEG_DECODER" ]
-    deps += [ "//third_party/ffmpeg" ]
-  }
 
-  if (is_mac) {
-    ldflags = [ "-Wl,-install_name,@loader_path/libopencdm.dylib" ]
+    # TODO(jschuh): crbug.com/167187 fix size_t to int truncations.
+    configs += [ "//build/config/compiler:no_size_t_to_int_warning" ]
+
+    defines = [ "CDM_IMPLEMENTATION" ]
+
+    deps = [
+      "//media/cdm/ppapi/clear_key_cdm:cdm_proxy_common",
+      "//base",
+      "//build/config:exe_and_shlib_deps",
+      "//media",  # For media::AudioTimestampHelper
+      "//media:shared_memory_support",  # For media::AudioBus.
+      "//media/cdm:cdm_api",  # For content_decryption_module.h
+      "//url",
+    ]
+
+    ldflags = []
+
+    if (media_use_ffmpeg) {
+      sources += [
+        "//media/cdm/ppapi/clear_key_cdm/ffmpeg_cdm_audio_decoder.cc",
+        "//media/cdm/ppapi/clear_key_cdm/ffmpeg_cdm_audio_decoder.h",
+        "//media/cdm/ppapi/clear_key_cdm/ffmpeg_cdm_video_decoder.cc",
+        "//media/cdm/ppapi/clear_key_cdm/ffmpeg_cdm_video_decoder.h",
+      ]
+      defines += [
+        "OCDM_USE_FFMPEG_DECODER",
+        "CLEAR_KEY_CDM_USE_FFMPEG_DECODER",
+      ]
+      deps += [ "//third_party/ffmpeg" ]
+      ldflags += [
+        "-Wl,-Bsymbolic",
+#        "-Wl,-read_only_relocs,suppress",
+      ]
+    }
+
+    print(ldflags)
+
+    if (is_mac) {
+      ldflags += [ "-Wl,-install_name,@loader_path/libopencdm.dylib" ]
+    }
+  }
+} else {
+  group("opencdm") {
+     # NOP
   }
 }
 
-ppapi_cdm_adapter("opencdmadapter") {
-  defines = [ "CHECK_DOCUMENT_URL" ]
+if (enable_opencdm && enable_library_cdms) {
+  ppapi_cdm_adapter("opencdmadapter") {
+    defines = [ "CHECK_DOCUMENT_URL" ]
 
-  deps = [
-    ":opencdm",
-    "//base",
-    "//media:shared_memory_support",
-    "//ui/gfx/geometry",
-  ]
+    deps = [
+      ":opencdm",
+      "//base",
+      "//media:shared_memory_support",
+      "//ui/gfx/geometry",
+    ]
+  }
+} else {
+    # Placeholder when we're not compiling the adapter.
+    group("opencdmadapter") {
+  }
 }
 
-static_library("renderer") {
+source_set("opencdm_ks") {
   sources = [
     "opencdm_key_systems.cc",
     "opencdm_key_systems.h",
@@ -92,8 +116,8 @@ static_library("renderer") {
 
   deps = [
     "//base",
-#    "//components/cdm/common",
-#    "//content/public/renderer",
+    "//components/cdm/common",
+    "//content/public/renderer",
     "//media",
     "//media:media_features",   # for ENABLE_LIBRARY_CDMS
   ]
